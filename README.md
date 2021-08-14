@@ -346,6 +346,108 @@ available for any derived types, such as Date, Array, etc.
   convert the object to a primitive type and then it will be converted to String
   (which is what triggered the object coercion).
 
+## Hoisting
+
+---
+
+Base concepts:
+
+- Hoisting happens at the _creation_ stage when a new _execution context_ is
+  created.
+- Variables declared with the _var_ keyword are _function scoped_.
+- Functions declared with the _function_ keyword are _function scoped_.
+- Variables and functions declared with _const_ or _let_ have _block scope_ (if,
+  while, for, function, etc., have blocks (delimited by "{" and "}")), so they're
+  not hoisted.
+
+---
+
+The following elements are "Hoisted":
+
+- Variables declared with the _var_ keyword.
+- Function declared with the _function_ keyword.
+
+Functions are completly hoisted, i.e. ("internally") the whole function
+definition is "moved" to the begining of the scope.
+
+Example:
+
+```javascript
+// Code as it is writen in the file. ///////////////////////////////////////////
+
+function foo() {
+  // Some statements (1)...
+
+  function bar() {
+    // Some statements (2)...
+  }
+
+  // Some statements (3)...
+
+  function baz() {
+    // Some statements (4)...
+  }
+
+  // Some statements (5)...
+}
+
+// Code as taken by the engine (hoisted) ///////////////////////////////////////
+
+function foo() {
+  function bar() {
+    // Some statements (2)...
+  }
+
+  function baz() {
+    // Some statements (4)...
+  }
+
+  // Some statements (1)...
+
+  // Some statements (3)...
+
+  // Some statements (5)...
+}
+```
+
+Variables are partly hoisted, i.e. only the the declaration is hoisted, thus its
+initial value is "undefined".
+
+Example:
+
+```javascript
+// Code as it is writen in the file. ///////////////////////////////////////////
+
+function foo() {
+  // Some statements (1)...
+
+  var bar = "bar";
+
+  // Some statements (3)...
+
+  var baz = "baz";
+
+  // Some statements (5)...
+}
+
+// Code as taken by the engine (hoisted) ///////////////////////////////////////
+
+function foo() {
+  var bar = undefined;
+  var baz = undefined;
+
+  // Some statements (1)...
+
+  bar = "bar";
+
+  // Some statements (3)...
+
+  baz = "baz";
+
+  // Some statements (5)...
+}
+```
+
 ## References
 
 Some info taken from:
