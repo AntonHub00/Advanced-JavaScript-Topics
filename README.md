@@ -485,9 +485,116 @@ const newFunc = foo();
 newFunc();
 ```
 
+## Prototypes
+
+Prototypes are the mechanism by which JavaScript objects inherit features from
+one another. It is not classic inheritance like Java.
+
+JavaScript is often described as a prototype-based language — to provide
+inheritance, objects can have a prototype object, which acts as a template
+object that it inherits methods and properties from.
+
+An object's prototype object may also have a prototype object, which it inherits
+methods and properties from, and so on. This is often referred to as a
+**prototype chain**, and explains why different objects have properties and
+methods defined on other objects available to them.
+
+Every (and only) functions have a "protoype" property. This "property" object is
+what other objects will inherit.
+
+"Object" is a function (a constructor function). "Object.protoype" (is
+called the base object) is what all objects inherit.
+
+With "\_\_proto\_\_" and "Object.getPrototypeOf(obj)" we can get the constructor
+function used to create that object, i.e points to the "prototype" property of
+the constructor function:
+
+```javascript
+// Suppose Foobar is a constructor function.
+const fooInstance = new Foobar();
+
+// Then
+Object.getPrototypeOf(fooInstance) === Foobar.prototype;
+fooInstance.__proto__ === Foobar.prototype;
+```
+
+With the "new" operator, (after creating the object in memory and before
+running function Foo() with this defined to it) the reference to the protoype
+object is copied to the internally "[[prototype]]" of the new instance.
+
+Example:
+
+```javascript
+const obj = new Foo(); // Being "Foo" a constructor function.
+
+// "const obj = Foo();" Internally is somethig like this:
+const obj = new Object();
+obj[[protoype]] = Foo.prototype;
+Foo.call(obj);
+```
+
+Example of prototyping with constructor function:
+
+```javascript
+// constructor function
+function Person(name, age) {
+  this.name = name;
+  this.age = age;
+  this.health = "healthy";
+
+  this.greet = function () {
+    console.log(`Hello I'm ${this.name} and I'm ${this.age}`);
+  };
+}
+
+// Create objects
+const person1 = new Person("John", 18);
+const person2 = new Person("Tony", 40);
+
+// Access properties
+console.log(person1.name); // John
+console.log(person1.greet()); // Tony
+
+console.log(person2.name); // Hello I'm John and I'm 18
+console.log(person2.greet()); // Hello I'm Tony and I'm 18
+```
+
+Example of prototyping by creating an object taking as a prototype other object:
+
+```javascript
+const human = {
+  isMortal: true,
+};
+
+// A "safety" way to create a protoype (without modifying the "__proto__" property directly).
+const person = Object.create(human);
+person.age = 23; // This property only exists in the "person" object.
+
+console.log("human is protoype of person: ", human.isPrototypeOf(person)); // true. "human" was used as prototype to create "person".
+
+console.log("person: ", person); // {age: 23}.
+console.log("person age: ", person.age); // 23.
+console.log("person is mortal: ", person.isMortal); // true. Inherits the property from "human".
+
+console.log("person.__proto__: ", person.__proto__); // {isMortal: true}. Makes reference to the prototype used to be created.
+console.log("human.prototype: ", human.protoype); // undefined since is not a constructor function.
+
+console.log(
+  "person has own property isMortal: ",
+  person.hasOwnProperty("isMortal")
+); // false. "isMortal" only exists in "human".
+
+console.log(
+  "person.__proto__ has own property isMortal: ",
+  person.__proto__.hasOwnProperty("isMortal")
+); // true. The prototype("human") used to create the "person" object has defined the "isMortal" property.
+```
+
 ## References
 
 Some info taken from:
 
 - [JavaScript type coercion explained](https://www.freecodecamp.org/news/js-type-coercion-explained-27ba3d9a2839/)
+- [JavaScript Constructor Function](https://www.programiz.com/javascript/constructor-function)
+- [Object prototypes](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Object_prototypes)
 - Some more probably missing.
