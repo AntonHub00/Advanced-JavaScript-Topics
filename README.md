@@ -448,6 +448,43 @@ function foo() {
 }
 ```
 
+## Closures
+
+Closures are posible due to the following things:
+
+- Funtions are first class citizens (we can treat them as other types, i.e. can
+  be assigned to variables, been passed as parameters or been returned from
+  functions).
+- Lexical scope/environment.
+
+A closure means a function can access the variables from an enclosing
+scope/environment even after it leaves the scoped in which it was declared. This
+is posible because if a variable from the outside function is used in the inner
+function, due to the inner function keeps a reference to the outer variable,
+that variable is not destroyed (is not garbage collected).
+
+```javascript
+function foo() {
+  const baz = "baz";
+
+  function bar() {
+    console.log(`I'm the ${baz} variable`);
+  }
+
+  // Returning the "bar" function creates a closure because it is making a
+  // reference to the "baz" variable and then this function is leaving the scope
+  // where it was created.
+  return bar;
+}
+
+const newFunc = foo();
+
+// This prints "I'm the baz variable" because a reference to the "baz" variable
+// is still available (not detroyed/garbage collected) even if the "foo"
+// function was already executed.
+newFunc();
+```
+
 ## References
 
 Some info taken from:
