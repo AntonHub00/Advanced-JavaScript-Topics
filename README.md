@@ -590,6 +590,41 @@ console.log(
 ); // true. The prototype("human") used to create the "person" object has defined the "isMortal" property.
 ```
 
+## "new" operator (constructor functions)
+
+The new operator lets developers create an instance of a user-defined object
+type or of one of the built-in object types that has a constructor function.
+
+The "new" keyword does the following things:
+
+1. Creates a blank, plain JavaScript object.
+2. Adds a property to the new object (\_\_proto\_\_) that links to the
+   **constructor function's prototype** object.
+3. Binds the newly created object instance as the **this** context (i.e. all
+   references to **this** in the constructor function now refer to the object
+   created in the first step).
+4. Returns this if the function doesn't return an object.
+
+**Note**:
+
+Properties/objects added to the **construction function prototype** are
+therefore accessible to all instances created from the constructor function
+(using new).
+
+Example:
+
+```javascript
+// This not exactly how it works, but is useful to ilustrate.
+
+const obj = new Foo(arg1, arg2, ...); // Being "Foo" a constructor function.
+
+// "const obj = Foo();" Internally is somethig like this:
+const obj = new Object();
+obj.__proto__ = Foo.prototype;
+Foo.call(obj, arg1, arg2, ...); // "this" inside the constructor function takes the value of "obj".
+
+```
+
 ## References
 
 Some info taken from:
@@ -597,4 +632,5 @@ Some info taken from:
 - [JavaScript type coercion explained](https://www.freecodecamp.org/news/js-type-coercion-explained-27ba3d9a2839/)
 - [JavaScript Constructor Function](https://www.programiz.com/javascript/constructor-function)
 - [Object prototypes](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Object_prototypes)
+- [new operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/new)
 - Some more probably missing.
