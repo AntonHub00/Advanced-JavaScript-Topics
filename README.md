@@ -625,6 +625,229 @@ Foo.call(obj, arg1, arg2, ...); // "this" inside the constructor function takes 
 
 ```
 
+## Classes (ES6)
+
+Classes are a template for creating objects. They encapsulate data with code to
+work on that data. Classes in JS are built on prototypes but also have some
+syntax and semantics that are not shared with ES5 class-like semantics.
+
+Classes are "special functions". Clases are just "syntactic sugar" because under
+the hood is not using "classical inheritance", but "prototype-based
+inheritance".
+
+The body of a class is executed in strict mode.
+
+The constructor method is a special method for creating and initializing an
+object created with a class. There can only be one special method with the name
+"constructor" in a class. A SyntaxError will be thrown if the class contains
+more than one occurrence of a constructor method.
+
+Classes can be writen as class declaration or class expressions (as same as
+functons), but the difference is that classes declarations are not hoisted.
+
+Example of class declaration and class expression:
+
+```javascript
+// Class declaration
+class Rectangle {
+  constructor(height, width) {
+    this.height = height;
+    this.width = width;
+  }
+}
+
+// Class expression (unnamed)
+let Rectangle = class {
+  constructor(height, width) {
+    this.height = height;
+    this.width = width;
+  }
+};
+console.log(Rectangle.name); // Rectangle
+
+// Class expression (named)
+let Rectangle = class Rectangle2 {
+  constructor(height, width) {
+    this.height = height;
+    this.width = width;
+  }
+};
+console.log(Rectangle.name); // Rectangle2
+```
+
+All **instance** methods and properties are public by default:
+
+```javascript
+class Foo {
+  constructor(publicInstanceProperty) {
+    this.publicInstanceProperty = publicInstanceProperty;
+  }
+
+  publicInstanceMethod() {
+    return "I'm a public instance method";
+  }
+}
+
+const fooInstance = new Foo("I'm a public instance property");
+
+console.log(fooInstance.publicInstanceProperty); // "I'm a public instance property".
+console.log(fooInstance.publicInstanceMethod()); //  "I'm a public instance method".
+```
+
+**Instance** properties can be defined inside or outside the constructor, but
+**instance** properties defined outside of the constructor can have or not a
+default value (useful when some instance data definition or initialization does
+not required to be passed to the constructor):
+
+```javascript
+class Person {
+  foo; // Instance property.
+  bar = 10; // Instance property.
+
+  constructor(name, age) {
+    this.name = name; // Instance property.
+    this.age = age; // Instance property.
+  }
+}
+
+const personObj = new Person("John", 45);
+
+console.log(personObj.foo); // undefined.
+console.log(personObj.bar); // 10.
+console.log(personObj.name); // 'John'.
+console.log(personObj.age); // 45.
+```
+
+The "static" keyword defines a static method or property for a class. Static
+members (properties and methods) are called without instantiating their class
+and cannot be called through a class instance. Static methods are often used to
+create utility functions for an application, whereas static properties are
+useful for caches, fixed-configuration, or any other data you don't need to be
+replicated across instances. A class with a static member can be sub-classed. In
+order to call a static method or property within another static method of the
+same class, you can use the this keyword.
+
+Example of static members:
+
+```javascript
+class Point {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+
+  static displayName = "Point";
+
+  static distance(a, b) {
+    const dx = a.x - b.x;
+    const dy = a.y - b.y;
+
+    return Math.hypot(dx, dy);
+  }
+}
+
+const p1 = new Point(5, 5);
+const p2 = new Point(10, 10);
+
+console.log(p1.displayName); // undefined
+console.log(p1.distance); // undefined
+console.log(p2.displayName); // undefined
+console.log(p2.distance); // undefined
+
+console.log(Point.displayName); // "Point"
+console.log(Point.distance(p1, p2)); // 7.0710678118654755
+```
+
+Private properties and methods can be writen or read within the class body.By
+defining things that are not visible outside of the class, you ensure that your
+classes's users can't depend on internals, which may change from version to
+version:
+
+```javascript
+class AClass {
+  // Private members are defined using "#".
+
+  static #foo = 1;
+  #bar = 10;
+  #someVar;
+
+  constructor(someVar) {
+    this.#someVar = someVar;
+  }
+
+  #foobar() {
+    return 'Im private "foobar" instance method';
+  }
+
+  static #foobaz() {
+    return 'Im private static "foobaz" method';
+  }
+
+  printMembers() {
+    console.log(AClass.#foo); // Static private members can only be use inside the class and with the class name.
+    console.log(AClass.#foobaz()); // Static private members can only be use inside the class and with the class name.
+    console.log(this.#bar); // Private members can only be use inside the class.
+    console.log(this.#someVar); // Private members can only be use inside the class.
+    console.log(this.#foobar()); // Private members can only be use inside the class.
+  }
+}
+
+const aClassInstance = new AClass("someVar value");
+
+console.log(AClass.#foo); // Error thrown.
+console.log(AClass.#foobaz()); // Error thrown.
+console.log(aClassInstance.#bar); // Error thrown.
+console.log(aClassInstance.#foobar()); // Error thrown.
+console.log(aClassInstance.printMembers());
+```
+
+It is a syntax error to refer to # names from out of scope. It is also a syntax
+error to refer to private fields that were not declared before they were called,
+or to attempt to remove declared fields with delete:
+
+```javascript
+class ClassWithPrivateField {
+  #privateField;
+
+  constructor() {
+    this.#privateField = 42;
+    delete this.#privateField;   // Syntax error
+    this.#undeclaredField = 444; // Syntax error
+  }
+}
+
+const instance = new ClassWithPrivateField()
+instance.#privateField === 42;   // Syntax error
+
+```
+
+"this" in ES6 classes behaves the same as in constructor functions and object
+methods, but the difference is that the value of "this" will be undefined if it
+is called without a value for "this" (due to the body of a class is executed in
+strict mode), instead of referencing something like the global object.
+
+Example of binding "this" with "prototype" (class (?)) and static methods:
+
+```javascript
+class Animal {
+  speak() {
+    return this;
+  }
+  static eat() {
+    return this;
+  }
+}
+
+let obj = new Animal();
+obj.speak(); // the Animal object
+let speak = obj.speak;
+speak(); // undefined (not the global object)
+
+Animal.eat(); // class Animal
+let eat = Animal.eat;
+eat(); // undefined (not the global object)
+```
+
 ## References
 
 Some info taken from:
@@ -633,4 +856,6 @@ Some info taken from:
 - [JavaScript Constructor Function](https://www.programiz.com/javascript/constructor-function)
 - [Object prototypes](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Objects/Object_prototypes)
 - [new operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/new)
+- [Classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)
+- [Private class features](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_class_fields)
 - Some more probably missing.
