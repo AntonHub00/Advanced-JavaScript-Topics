@@ -848,6 +848,169 @@ let eat = Animal.eat;
 eat(); // undefined (not the global object)
 ```
 
+## Inheritance
+
+When it comes to inheritance, JavaScript only has one construct: **objects**.
+Each object has a private property which holds a link to another object called
+its **prototype**. That prototype object has a prototype of its own, and so on
+until an object is reached with null as its prototype. By definition, null has
+no prototype, and acts as the final link in this **prototype chain**.
+
+Notes for constructor functions:
+
+- Members declared with "this" keyword will be members of the object created, it
+  means those variables or functions won't belong to the constructor function,
+  just the to the created object.
+- If you want something to be inherit for all the created objects, you should
+  use "youConstructorFunction.prototype". Because of this, you should use the
+  prototype to add functions and properties there, otherwise every object will has
+  its own functions and properties and it is no very memory efficient.
+
+In short, use "this" inside the constructor function to add members that are
+specific to the object that will be created, and use the prototype of the
+constructor function for things that you want to share across all the objects
+(instances) like "methods" or properties like "constants" or values that all
+objects should have. For example, if you create a "Human" constructor function,
+you can declare with "this" things like the properties "name", "age", "alive"
+because usually these properties are unique or different for each human created.
+On the other hand, there are things that all humans instances should have like
+"eat" or "sleep" functions or the "cientificName" property, because you don't
+want to waste memory for things that all "Human" instances do or have (although
+you can overwrite those members for an specific object).
+
+## With prototype chain directly (constructor functions)
+
+There are multiple ways to extend the prototype chain (inheritance), so here are
+some examples:
+
+With "new" initialization:
+
+```javascript
+// We create a new "foo" constructor function and add a property to its
+// prototype.
+function foo() {}
+foo.prototype.foo_prop = "foo val";
+
+// We create a new object from the "foo" constructor function that will be used
+// to extend the "bar" prototype.
+var proto = new foo();
+proto.bar_prop = "bar val";
+
+// We create a new "bar" constructor function and set its prototype to be the
+// "proto" object.
+function bar() {}
+bar.prototype = proto;
+
+var inst = new bar();
+
+console.log(inst.foo_prop);
+console.log(inst.bar_prop);
+```
+
+With Object.create():
+
+```javascript
+// We create a new "foo" constructor function and add a property to its
+// prototype.
+function foo() {}
+foo.prototype.foo_prop = "foo val";
+
+// We create and object which will contain the value of the "foo" prototype.
+var proto = Object.create(foo.prototype);
+
+// We create a new "bar" constructor function, add a new property to what will
+// be the "inherited" prototype, and then set the prototype of the "bar"
+// constructor function to be the prototype object created from "foo" prototype.
+function bar() {}
+proto.bar_prop = "bar val";
+bar.prototype = proto;
+
+var inst = new bar();
+
+console.log(inst.foo_prop);
+console.log(inst.bar_prop);
+```
+
+With Object.setPrototypeOf():
+
+```javascript
+// We create a new "foo" constructor function and add a property to its
+// prototype.
+function foo() {}
+foo.prototype.foo_prop = "foo val";
+
+// We create a new "bar" constructor function.
+function bar() {}
+
+// We create an object that will be the prototype of the "bar" constructor
+// function.
+var proto = {
+  bar_prop: "bar val",
+};
+
+// We add the prototpe of the "foo" constructor function to the object that will
+// be the prototype of the "bar" constructor function.
+Object.setPrototypeOf(proto, foo.prototype);
+
+// We set the "proto" object to be the prototype of the "bar" constructor
+// function.
+bar.prototype = proto;
+
+// Now the bar function has a property in its prototype and another property in
+// in the prototype of the "parent" (which is the "foo" prototype).
+var inst = new bar();
+
+console.log(inst.foo_prop);
+console.log(inst.bar_prop);
+```
+
+## With ES6 classes
+
+With ES6 classes, all the properties defined with the "this" keyword will be
+instance properties (will exist only in the created object) and all the methods
+will be part of the prototype.
+
+```javascript
+class Polygon {
+  constructor(height, width) {
+    this.height = height; // Will exist only in the created object
+    this.width = width; // Will exist only in the created object
+  }
+
+  // Will exist only in the Polygon prototype (Polygon.prototype)
+  showValues() {
+    console.log(this.height, this.width);
+  }
+}
+
+class Square extends Polygon {
+  constructor(sideLength) {
+    super(sideLength, sideLength);
+  }
+
+  // getters are an exception. This seems to be in both the created object and
+  // the Square prototype (Square.prototype)
+  get area() {
+    return this.height * this.width;
+  }
+
+  // setters are an exception. This seems to be in both the created object and
+  // the Square prototype (Square.prototype)
+  set sideLength(newLength) {
+    this.height = newLength;
+    this.width = newLength;
+  }
+
+  // Will exist only in the Square prototype (Square.prototype)
+  printObjectName() {
+    console.log("I'm a Square");
+  }
+}
+
+var square = new Square(2);
+console.log(square);
+```
+
 ## References
 
 Some info taken from:
@@ -858,4 +1021,5 @@ Some info taken from:
 - [new operator](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/new)
 - [Classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)
 - [Private class features](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_class_fields)
+- [Inheritance and the prototype chain](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain#using_prototypes_in_javascript)
 - Some more probably missing.
