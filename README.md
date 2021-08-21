@@ -1011,6 +1011,333 @@ var square = new Square(2);
 console.log(square);
 ```
 
+## Functional programming
+
+Is about separation of concerns.
+
+In functional programming usually functions operate on well-known data
+structures (objects, arrays, etc.) instead of belong to them.
+
+The pillar of functional programming is the "pure function".
+
+### The "perfect function"
+
+A "perfect function" should:
+
+- Do one task and one task only (a function that is simple, do one thing
+  well can be tested easily).
+- Have a return statement.
+- Be pure.
+- Have no share state with other functions.
+- Have imutable state (state can only be modified for things defined inside the
+  function, but not outside).
+- Be composable.
+- Be predictable.
+
+### Pure functions
+
+A function is called "pure" if it:
+
+- Can get the same output giving the same input.
+- Have no side effects (does not modify anything outside itself).
+
+The goal of functional programming is not to make everything pure functions, but
+minimize side effects. This is because you always need to receive, retrieve or
+return data (which implies side effects), but by minimizing side effects you
+also minimize bugs.
+
+Functional programming helps to organize your code in a way the you can isolate
+side effects (input/output, DB calls, API calls, etc.) because it makes the code
+predictable and easy to debug.
+
+Example of side effects:
+
+```javascript
+// This function have side effects since changes the state of the "someArray"
+// variable (because an array is passed as reference).
+function mutateArray(someArray) {
+  someArray.pop();
+}
+
+// This function have side effects since changes the state of the "someArray"
+// variable (because an array is passed as reference).
+function mutateArray2(someArray) {
+  someArray.forEach((item) => array.push(1));
+}
+
+// This function have side effects since changes the state of the "browser"
+// which is something outside of the function itself.
+function sayHi() {
+  console.log("Hi there!");
+}
+
+// This function have no side effects since it is not changing the state of
+// "someArray", instead we are returning a new array created from "someArray".
+function removeLastItem(someArray) {
+  const newArray = [...someArray]; // Supose all items are primitives.
+  newArray.pop();
+  return newArray;
+}
+```
+
+Example of same output giving the same input:
+
+```javascript
+// This function gives the same output having the same input. It always return 7
+// if you give 3 and 4, for example.
+function sumNums(a, b) {
+  return a + b;
+}
+
+// This also is called as "Referential transparency" which means that a function
+// can be change by its value without affecting the program's behavior. For
+// example, "sumNums(3, 4)" can be changed by "7" and the program's behavior is
+// the same.
+
+// This function gives the same output having the same input. You can pass no
+// parameters and have always printed "Hi there!" and returned "undefined" or
+// you can pass "one" and the output will be the same.
+function sayHi() {
+  console.log("Hi there!");
+}
+```
+
+Example of pure function:
+
+```javascript
+// This is a "pure function" because it has no side effects (does not modify
+// anything outside itself) and, for example, always will return "8" if you pass
+// "4" and "4".
+function sumNums(a, b) {
+  return a + b;
+}
+```
+
+### Idempotence
+
+An operation that can be applied multiple times without changing the result
+beyond the initial application.
+
+This thing is useful if we are taking about paralell and distributed computation
+because makes code predictable.
+
+For example, the first time you try to delete a user from a DB that user will be
+deleted, but if you try to do the same operation one or more times, the result
+will be the same (no state in the server is changed and it is because you can
+not delete a user multiple times).
+
+Also: f(f(x)) = f(x)
+
+Example:
+
+```javascript
+// This is idempotent because calling multiple times this functions over the
+// same results gives the same result.
+Math.abs(-50); // 50
+Math.abs(Math.abs(-50)); // 50
+Math.abs(Math.abs(Math.abs(-50))); // 50
+
+// This is not idempotent because calling this function over the same data
+// produces different outputs.
+function addOne(num) {
+  return ++num;
+}
+
+addOne(1); // 2
+addOne(addOne(1)); // 3
+addOne(addOne(addOne(1))); // 4
+
+// This is idempotent because calling this function over the same data produces
+// the same output.
+function multiplyByOne(num) {
+  return num * 1;
+}
+
+multiplyByOne(15); // 15
+multiplyByOne(multiplyByOne(15)); // 15
+multiplyByOne(multiplyByOne(multiplyByOne(15))); // 15
+```
+
+### Imperative vs Declarative
+
+Imperative: With tell the computer how to do things.
+
+Declaraive: With tell the computer what to do things, but not how to do it.
+
+Declarative programming allows to abstract a lot of the complexity and thus the
+code is easier to read, maintain and we can be more productive.
+
+### Inmutability
+
+Not to change the state. This can be acomplished by making a "copy" of the state
+and return a new state.
+
+Example:
+
+```javascript
+const person = {
+  name: "John",
+  age: "23",
+};
+
+// This is mutable because we are changing the state of the "person" object.
+person.name = "Tony";
+
+// This is inmutable because we are not changing the state of the "person"
+// object, instead we are returning a copy of the given object with the property
+// "name" modified.
+function changeName(obj, newName) {
+  const newObject = { ...obj };
+  newObject.name = newName;
+  return newObject;
+}
+
+const personModified = changeName(person, "Cassie");
+```
+
+### High order functions and closures
+
+Because in JavaScript functions are first class citizens (can be stored in
+variables, passed to functions as parameters or returned from functions), so we
+can have high order functions and closures.
+
+By definition, a higher-order function is a function that either takes a
+function as an argument or returns a function.
+
+Example:
+
+```javascript
+// High Order Function
+const hof = () => innerFunc(5);
+
+hof((num) => num);
+
+hof(function (num) {
+  return num;
+});
+
+// Closure
+
+const closure = function () {
+  let counter = 0;
+
+  return function () {
+    return ++counter;
+  };
+};
+
+const incrementFunc = closure();
+
+console.log(incrementFunc()); // 1
+console.log(incrementFunc()); // 2
+console.log(incrementFunc()); // 3
+```
+
+### Currying
+
+Is the technique of converting a function that takes multiple arguments into a
+sequence of functions that each takes a single argument
+
+```javascript
+function multiplyTwoNums(num1) {
+  return function multiplyByThree(num) {
+    return num1 * num2;
+  };
+}
+
+const multiplyTwoNumsArrow = (num1) => (num2) => num1 * num2;
+
+let result = multiplyTwoNums(3)(4); // 12
+result = multiplyTwoNumsArrow(3)(4); // 12
+
+const multiplyBySix = multiplyTwoNums(6);
+result = multiplyBySix(10); // 60
+```
+
+### Partial application
+
+Partial application (or partial function application) refers to the process of
+fixing a number of arguments to a function, producing another function of
+smaller arity.
+
+```javascript
+const result;
+
+const multiplyTwoNumsArrow = (num1)=> (num2) => num1 * num2;
+
+const partialMultiplyBySix = multiplyTwoNumsArrow.bind(null, 6);
+result = partialMultiplyBySix(10); // 60
+
+const multiplyThreeNumsArrow = (num1) => (num2) => (num3) => num1 * num2 * num3;
+
+const partialMultiplyBySixAndFive = multiplyThreeNumsArrow.bind(null, 6, 5);
+result = partialMultiplyBySixAndFive(10); // 300
+
+const partialMultiplyBySixNew = multiplyThreeNumsArrow.bind(null, 6);
+result = partialMultiplyBySixNew(5, 10); // 300
+```
+
+### Composition and Pipeline (pipe or piping)
+
+#### Composition
+
+Function composition is an act or mechanism to combine simple functions to build
+more complicated ones.
+
+Example:
+
+```javascript
+let result;
+
+const multiplyByThree = (num) => num * 3;
+const addOne = (num) => ++num;
+
+const composeIt = (func1, func2) => (data) => func1(func2(data));
+
+const multiplyByThreeAndAddOne = composeIt(addOne, multiplyByThree);
+
+result = multiplyByThreeAndAddOne(5); // 16 ((5 * 3) + 1)
+```
+
+#### Pipeline (pipe or piping)
+
+Pipeline consists of a chain of processing elements (processes, threads,
+coroutines, functions, etc.), arranged so that the output of each element is the
+input of the next.
+
+Example:
+
+```javascript
+let result;
+
+const multiplyByThree = (num) => num * 3;
+const addOne = (num) => ++num;
+
+result = addOne(multiplyByThree(5)); // 16 ((5 * 3) + 1)
+result = multiplyByThree(addOne(5)); // 1* ((5 + 1) * 3)
+```
+
+#### Composition vs Piping
+
+Piping is used to perform a sequence of operations on some value (just like
+piping in Unix). The input to each function is the output of the previous
+function.
+
+Composition is similar in that it calls functions in sequence (i.e., the output
+of the first is the input to the second) but it returns a function instead of
+immediately invoking the sequence.
+
+## Arity
+
+Arity is the number of parameters a function takes.
+
+Usually is a "good practice" to have few parameters. The fewer the number of
+parameters a function takes, the esier it is to use.
+
+This also makes functions more flexible to use with composition, piping or
+currying. If a function take too many parameters, is harder to make composition,
+piping or currying.
+
 ## References
 
 Some info taken from:
